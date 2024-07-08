@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import "./App.css";
-import { getContacts, saveContact, udpatePhoto } from "./api/ContactService";
+import "react-toastify/dist/ReactToastify.css";
 import Header from "./components/Header";
 import ContactList from "./components/ContactList";
+import { getContacts, saveContact, udpatePhoto } from "./api/ContactService";
 import { Routes, Route, Navigate } from "react-router-dom";
+import ContactDetail from "./components/ContactDetail";
+import { toastError } from "./api/ToastService";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   const modalRef = useRef();
@@ -27,6 +30,7 @@ function App() {
       setData(data);
     } catch (error) {
       console.log(error);
+      toastError(error.message);
     }
   };
 
@@ -56,6 +60,26 @@ function App() {
       getAllContacts();
     } catch (error) {
       console.log(error);
+      toastError(error.message);
+    }
+  };
+
+  const updateContact = async (contact) => {
+    try {
+      const { data } = await saveContact(contact);
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+      toastError(error.message);
+    }
+  };
+
+  const updateImage = async (formData) => {
+    try {
+      const { data: photoUrl } = await udpatePhoto(formData);
+    } catch (error) {
+      console.log(error);
+      toastError(error.message);
     }
   };
 
@@ -83,9 +107,19 @@ function App() {
                 />
               }
             />
+            <Route
+              path="/contacts/:id"
+              element={
+                <ContactDetail
+                  updateContact={updateContact}
+                  updateImage={updateImage}
+                />
+              }
+            />
           </Routes>
         </div>
       </main>
+
       {/* Modal */}
       <dialog ref={modalRef} className="modal" id="modal">
         <div className="modal__header">
@@ -182,6 +216,7 @@ function App() {
           </form>
         </div>
       </dialog>
+      <ToastContainer />
     </>
   );
 }
